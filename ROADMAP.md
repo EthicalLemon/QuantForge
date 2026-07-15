@@ -13,7 +13,7 @@ Development is split into small, reviewable daily increments. Every feature shou
 
 ## Phase 2 - Portfolio analytics
 
-- [ ] Covariance and correlation diagnostics
+- [x] Covariance and correlation diagnostics
 - [ ] Portfolio return, volatility and marginal risk contribution
 - [ ] Long-only minimum-variance optimizer
 - [ ] Maximum-Sharpe optimizer with explicit constraints

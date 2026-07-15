@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -16,6 +17,30 @@ def _returns(values: Iterable[float]) -> np.ndarray:
     if not np.isfinite(array).all():
         raise ValueError("returns must contain only finite values")
     return array
+
+
+@dataclass(frozen=True)
+class CorrelationPair:
+    """Pairwise correlation summary for two assets."""
+
+    left: str
+    right: str
+    correlation: float
+
+
+def _return_matrix(returns_by_asset: dict[str, Iterable[float]]) -> tuple[list[str], np.ndarray]:
+    if len(returns_by_asset) < 2:
+        raise ValueError("returns_by_asset must contain at least two assets")
+
+    names = list(returns_by_asset)
+    columns = [_returns(returns_by_asset[name]) for name in names]
+    length = columns[0].size
+    if length < 2:
+        raise ValueError("each asset must contain at least two return observations")
+    if any(column.size != length for column in columns[1:]):
+        raise ValueError("all assets must have the same number of return observations")
+    matrix = np.column_stack(columns)
+    return names, matrix
 
 
 def annualized_return(returns: Iterable[float], periods_per_year: int = 252) -> float:
@@ -93,3 +118,41 @@ def historical_cvar(returns: Iterable[float], confidence: float = 0.95) -> float
     if tail.size == 0:
         return var
     return float(max(0.0, -np.mean(tail)))
+
+
+def covariance_matrix(
+    returns_by_asset: dict[str, Iterable[float]],
+    *,
+    periods_per_year: int | None = None,
+) -> np.ndarray:
+    """Return the sample covariance matrix for aligned asset returns."""
+    _, matrix = _return_matrix(returns_by_asset)
+    covariance = np.cov(matrix, rowvar=False, ddof=1)
+    if periods_per_year is None:
+        return covariance
+    if periods_per_year <= 0:
+        raise ValueError("periods_per_year must be positive")
+    return covariance * periods_per_year
+
+
+def correlation_matrix(returns_by_asset: dict[str, Iterable[float]]) -> np.ndarray:
+    """Return the correlation matrix for aligned asset returns."""
+    _, matrix = _return_matrix(returns_by_asset)
+    return np.corrcoef(matrix, rowvar=False)
+
+
+def correlation_diagnostics(returns_by_asset: dict[str, Iterable[float]]) -> list[CorrelationPair]:
+    """Return pairwise correlations sorted by absolute strength."""
+    names, _ = _return_matrix(returns_by_asset)
+    correlations = correlation_matrix(returns_by_asset)
+    pairs: list[CorrelationPair] = []
+    for left_index, left_name in enumerate(names[:-1]):
+        for right_index in range(left_index + 1, len(names)):
+            pairs.append(
+                CorrelationPair(
+                    left=left_name,
+                    right=names[right_index],
+                    correlation=float(correlations[left_index, right_index]),
+                )
+            )
+    return sorted(pairs, key=lambda pair: abs(pair.correlation), reverse=True)

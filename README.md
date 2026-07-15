@@ -9,6 +9,7 @@ QuantForge is designed to become a compact but credible portfolio project: not a
 - Validated price and return series containers
 - CSV price-series loader with explicit missing-value policies
 - Compounded annualized return and volatility
+- Covariance, correlation, and pairwise dependency diagnostics
 - Sharpe and Sortino ratios
 - Maximum drawdown
 - Historical Value at Risk and Conditional Value at Risk
@@ -27,10 +28,17 @@ python examples/quickstart.py
 ```
 
 ```python
-from quantforge import load_price_series_csv
+from quantforge import correlation_diagnostics, load_price_series_csv
 
 prices = load_price_series_csv("data/spy.csv", missing="ffill", name="SPY")
 returns = prices.simple_returns()
+
+diagnostics = correlation_diagnostics(
+    {
+        "SPY": [0.01, 0.02, -0.01, 0.015],
+        "TLT": [0.004, -0.002, 0.003, 0.001],
+    }
+)
 ```
 
 ## Design principles

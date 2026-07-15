@@ -2,8 +2,12 @@
 
 from .data import PriceSeries, ReturnSeries, load_price_series_csv
 from .metrics import (
+    CorrelationPair,
     annualized_return,
     annualized_volatility,
+    correlation_diagnostics,
+    correlation_matrix,
+    covariance_matrix,
     historical_var,
     historical_cvar,
     max_drawdown,
@@ -16,8 +20,12 @@ __all__ = [
     "PriceSeries",
     "ReturnSeries",
     "load_price_series_csv",
+    "CorrelationPair",
     "annualized_return",
     "annualized_volatility",
+    "covariance_matrix",
+    "correlation_matrix",
+    "correlation_diagnostics",
     "historical_var",
     "historical_cvar",
     "max_drawdown",

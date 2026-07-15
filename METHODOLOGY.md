@@ -13,6 +13,13 @@ rows, drop them, or forward-fill from the last observed price.
 
 Input series are decimal periodic returns, such as `0.01` for one percent. Annualized return is calculated geometrically from compounded wealth. Volatility uses sample standard deviation and square-root-of-time scaling.
 
+## Cross-asset diagnostics
+
+Covariance matrices use the sample estimator with `ddof=1` on aligned return
+series. Correlation matrices normalize the same aligned observations, and the
+pairwise diagnostics rank asset pairs by absolute correlation so concentration
+and diversification relationships are visible before optimization work begins.
+
 ## Risk-adjusted performance
 
 The Sharpe ratio uses annualized compounded return minus an annual risk-free rate, divided by annualized volatility. The Sortino ratio replaces total volatility with downside deviation relative to a target return.
