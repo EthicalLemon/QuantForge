@@ -5,7 +5,9 @@
 Price series require at least two positive finite observations. They can be
 converted into simple decimal returns or continuously compounded log returns.
 Return series reject values below -100% and can generate a compounded wealth
-index for downstream analytics.
+index for downstream analytics. CSV imports map a chosen price column into the
+same validated model and make the missing-data policy explicit: reject missing
+rows, drop them, or forward-fill from the last observed price.
 
 ## Return convention
 

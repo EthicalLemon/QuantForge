@@ -1,6 +1,6 @@
 """QuantForge: compact, reproducible quantitative-finance research tools."""
 
-from .data import PriceSeries, ReturnSeries
+from .data import PriceSeries, ReturnSeries, load_price_series_csv
 from .metrics import (
     annualized_return,
     annualized_volatility,
@@ -15,6 +15,7 @@ from .simulation import geometric_brownian_motion
 __all__ = [
     "PriceSeries",
     "ReturnSeries",
+    "load_price_series_csv",
     "annualized_return",
     "annualized_volatility",
     "historical_var",

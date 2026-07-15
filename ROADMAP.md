@@ -8,7 +8,7 @@ Development is split into small, reviewable daily increments. Every feature shou
 - [x] Reproducible geometric Brownian motion simulator
 - [x] Unit-test baseline
 - [x] Validated price/return data model
-- [ ] CSV market-data loader with missing-value policy
+- [x] CSV market-data loader with missing-value policy
 - [ ] Optional live-data adapter with local caching
 
 ## Phase 2 - Portfolio analytics

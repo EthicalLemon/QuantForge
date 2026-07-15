@@ -7,6 +7,7 @@ QuantForge is designed to become a compact but credible portfolio project: not a
 ## Current capabilities - v0.1.0
 
 - Validated price and return series containers
+- CSV price-series loader with explicit missing-value policies
 - Compounded annualized return and volatility
 - Sharpe and Sortino ratios
 - Maximum drawdown
@@ -23,6 +24,13 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 python -m pip install -e ".[dev]"
 pytest
 python examples/quickstart.py
+```
+
+```python
+from quantforge import load_price_series_csv
+
+prices = load_price_series_csv("data/spy.csv", missing="ffill", name="SPY")
+returns = prices.simple_returns()
 ```
 
 ## Design principles

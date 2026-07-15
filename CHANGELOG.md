@@ -4,6 +4,7 @@
 
 - Added validated price and return series containers.
 - Added simple-return, log-return and wealth-index helpers.
+- Added a CSV price-series loader with configurable missing-value handling.
 
 ## 0.1.0 - 2026-07-14
 

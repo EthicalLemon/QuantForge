@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import csv
 from collections.abc import Iterable
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Literal
 
 import numpy as np
+
+
+MissingValuePolicy = Literal["raise", "drop", "ffill"]
 
 
 def _array(values: Iterable[float], *, label: str) -> np.ndarray:
@@ -18,6 +24,70 @@ def _array(values: Iterable[float], *, label: str) -> np.ndarray:
         raise ValueError(f"{label} must contain only finite values")
     result.setflags(write=False)
     return result
+
+
+def _is_missing(value: str | None) -> bool:
+    if value is None:
+        return True
+    return value.strip().lower() in {"", "na", "nan", "null"}
+
+
+def load_price_series_csv(
+    path: str | Path,
+    *,
+    price_column: str = "close",
+    name: str | None = None,
+    periods_per_year: int = 252,
+    missing: MissingValuePolicy = "raise",
+) -> "PriceSeries":
+    """Load a validated price series from a CSV file.
+
+    Missing values can be rejected, dropped, or forward-filled before the
+    resulting prices are validated.
+    """
+    if missing not in {"raise", "drop", "ffill"}:
+        raise ValueError("missing must be one of: raise, drop, ffill")
+
+    csv_path = Path(path)
+    with csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
+        if not reader.fieldnames or price_column not in reader.fieldnames:
+            raise ValueError(f"CSV file must contain '{price_column}' column")
+
+        prices: list[float] = []
+        last_price: float | None = None
+        for row_number, row in enumerate(reader, start=2):
+            raw_value = row.get(price_column)
+            if _is_missing(raw_value):
+                if missing == "raise":
+                    raise ValueError(
+                        f"Missing value in column '{price_column}' at row {row_number}"
+                    )
+                if missing == "drop":
+                    continue
+                if last_price is None:
+                    raise ValueError(
+                        "Cannot forward-fill the first missing price observation"
+                    )
+                prices.append(last_price)
+                continue
+
+            try:
+                price = float(raw_value)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(
+                    f"Invalid numeric value '{raw_value}' in column '{price_column}' "
+                    f"at row {row_number}"
+                ) from exc
+
+            prices.append(price)
+            last_price = price
+
+    return PriceSeries.from_prices(
+        prices,
+        name=name or csv_path.stem,
+        periods_per_year=periods_per_year,
+    )
 
 
 @dataclass(frozen=True)
